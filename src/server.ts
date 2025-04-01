@@ -3,6 +3,7 @@ import { registerSwagger } from './plugins/swagger';
 import { kafkaProducer } from './utils/kafkaProducer';
 import { authIDRoutes } from './controllers/account/accountAuth/authID/authID.routes';
 import { startAuthIDEventConsumer } from './consumers/authIDEventConsumer';
+import { requestCounter, metricsEndpoint } from './utils/metrics';
 
 const app = Fastify({ logger: true });
 
@@ -17,6 +18,21 @@ const start = async () => {
     await registerSwagger(app);
     app.register(authIDRoutes, {
       prefix: '/api/v1',
+    });
+
+    app.get('/metrics', metricsEndpoint);
+
+    app.addHook('onResponse', async (request, reply) => {
+      const method = request.method;
+      const route = request.routeOptions?.url || request.url;
+
+      // ✅ Prometheus에서는 labels에 문자열만 허용하므로, 숫자형을 문자열로 변환
+      const statusCode = reply.statusCode.toString();
+      const duration = reply.elapsedTime.toString();
+
+      if (route === '/metrics') return;
+
+      requestCounter.labels(method, route, statusCode, duration).inc();
     });
 
     app.get('/ping', async () => {
