@@ -5,7 +5,7 @@ interface ResponseResult {
     authID: string;
   }
   
-  export async function getAuthID(appID: string, userID: string): Promise<ResponseResult> {
+  export const getAuthID = async (appID: string, userID: string): Promise<ResponseResult> => {
     const conn = await pool.getConnection();
     try {
       const [rows] = await conn.query('CALL SelectAuthID(?, ?)', [appID, userID]);
