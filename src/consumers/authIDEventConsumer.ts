@@ -1,5 +1,9 @@
 import { Kafka } from 'kafkajs';
 import { AuthIDEventData } from '../types/kafka';
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const kafka = new Kafka({
     clientId: 'auth-id-event-consumer',
@@ -7,6 +11,9 @@ const kafka = new Kafka({
 });
 
 const consumer = kafka.consumer({ groupId: 'auth-id-event-group' });
+
+const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+const ALERT_TEST_USER = 'test-user';
 
 export const startAuthIDEventConsumer = async () => {
     await consumer.connect();
@@ -21,6 +28,20 @@ export const startAuthIDEventConsumer = async () => {
           if (value) {
             const data: AuthIDEventData = JSON.parse(value);
             console.log('📥 Received Kafka message:', data);
+            
+            if (data.userID === ALERT_TEST_USER) {
+                console.log(`🚨 ALERT! userID: ${data.userID} detected!`);
+            }
+
+            // Slack 알림 전송
+            try {
+                await axios.post(SLACK_WEBHOOK_URL!, {
+                    text: `🚨 *ALERT!* 특정 유저 감지됨\n• user_id: \`${data.userID}\``,
+                });
+                console.log('✅ Slack notification sent');
+            } catch (error) {
+                console.error('❌ Error sending Slack notification:', error);
+            }
           }
         },
       });

@@ -1,4 +1,5 @@
 export const authIDSchema = {
+    tags: ['Account'],
     querystring: {
         type: 'object',
         required: ['appID', 'userID'],
