@@ -28,6 +28,7 @@ export const startAuthIDEventConsumer = async () => {
             const data: AuthIDEventData = JSON.parse(value);
             console.log('📥 Received Kafka message:', data);
             
+            // 블록된 사용자 ID 확인
             if (data.userID === 'blockedUserID') {
                 console.log(`🚨 ALERT! Blocked User userID: ${data.userID} detected!`);
                 try {

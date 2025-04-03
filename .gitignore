@@ -141,4 +141,16 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+# Grafana
+grafana-dashboard
+
+# Prometheus
+prometheus
+
+# Promtail
+promtail
+
+# Loki
+loki
+
 # End of https://www.toptal.com/developers/gitignore/api/node

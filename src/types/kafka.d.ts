@@ -8,3 +8,17 @@ export interface AuthIDEventData {
     userID: string;
     authID: string;
 }
+
+export interface EventLogData {
+    header: {
+        authorization: string;
+        xForwardedFor: string[] | string;
+        userAgent: string;
+        contentType: string;
+    },
+    data: Record<string, any> | Record<string, any>[];
+    path: string;
+    method: string;
+    statusCode: number;
+    responseTime: number;
+}

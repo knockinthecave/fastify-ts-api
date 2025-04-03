@@ -1,5 +1,5 @@
 import { Kafka, Producer } from 'kafkajs';
-import { AuthIDEventData } from '../types/kafka';
+import { AuthIDEventData, EventLogData } from '../types/kafka';
 
 const kafka = new Kafka({
     clientId: 'fastify-api',
@@ -28,6 +28,28 @@ export const sendAuthIDEvent = async (data: AuthIDEventData) => {
             ],
         });
         console.log('✅ Message sent to Kafka:', data);
+    } catch (err) {
+        console.error('❌ Error sending message to Kafka:', err);
+    }
+};
+
+export const kafkaEventLogProducer = async (data: EventLogData) => {
+    if (!isConnected) {
+        await kafkaProducer.connect();
+        isConnected = true;
+    }
+    console.log('🚀 Kafka producer connected');
+
+    try {
+        await kafkaProducer.send({
+            topic: 'event-log',
+            messages: [
+                {
+                    key: data.header.authorization,
+                    value: JSON.stringify(data),
+                },
+            ]
+        });
     } catch (err) {
         console.error('❌ Error sending message to Kafka:', err);
     }
