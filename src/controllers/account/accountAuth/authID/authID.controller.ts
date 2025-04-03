@@ -32,6 +32,7 @@ export const authIDHandler= async (
         const responseTimeMs = diff[0] * 1000 + diff[1] / 1e6; // ms로 변환
 
         await kafkaEventLogProducer({
+            timestamp: new Date().toISOString(),
             header: {
                 authorization: req.headers['authorization'] || '',
                 xForwardedFor: req.headers['x-forwarded-for'] || req.ip ||'',

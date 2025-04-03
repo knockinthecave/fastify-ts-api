@@ -33,6 +33,17 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
       - kafka
+  
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    ports:
+      - "9308:9308"
+    environment:
+      - KAFKA_SERVER=kafka:9092
+    depends_on:
+      - kafka
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus

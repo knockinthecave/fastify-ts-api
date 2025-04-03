@@ -10,6 +10,7 @@ export interface AuthIDEventData {
 }
 
 export interface EventLogData {
+    timestamp: string;
     header: {
         authorization: string;
         xForwardedFor: string[] | string;
