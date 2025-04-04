@@ -12,7 +12,7 @@ const kafka = new Kafka({
 
 const consumer = kafka.consumer({ groupId: 'auth-id-event-group' });
 
-export const startAuthIDEventConsumer = async () => {
+export const startAuthIDEventConsumer = async (): Promise<void> => {
     const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
 
     await consumer.connect();

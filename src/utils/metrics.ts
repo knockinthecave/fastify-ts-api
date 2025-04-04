@@ -30,7 +30,7 @@ export const requestDuration = new Histogram({
 register.registerMetric(requestCounter);
 register.registerMetric(requestDuration);
 
-export const metricsEndpoint = async (req: FastifyRequest, reply: FastifyReply) => {
+export const metricsEndpoint = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     reply.header('Content-Type', register.contentType);
     reply.send(await register.metrics());
 };
