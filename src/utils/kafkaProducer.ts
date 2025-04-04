@@ -10,7 +10,7 @@ export const kafkaProducer: Producer = kafka.producer();
 
 let isConnected = false;
 
-export const sendAuthIDEvent = async (data: AuthIDEventData) => {
+export const sendAuthIDEvent = async (data: AuthIDEventData): Promise<void> => {
     if (!isConnected) {
         await kafkaProducer.connect();
         isConnected = true;
@@ -33,7 +33,7 @@ export const sendAuthIDEvent = async (data: AuthIDEventData) => {
     }
 };
 
-export const kafkaEventLogProducer = async (data: EventLogData) => {
+export const kafkaEventLogProducer = async (data: EventLogData): Promise<void> => {
     if (!isConnected) {
         await kafkaProducer.connect();
         isConnected = true;

@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { getAuthID } from './authID.service';
-import { sendAuthIDEvent, kafkaEventLogProducer } from '../../../../utils/kafkaProducer';
+import { sendAuthIDEvent } from '../../../../utils/kafkaProducer';
+import { eventLogger, getLogLevel } from '../../../../utils/logger';
 
 type RequestQuery = {
     appID: string;
@@ -21,41 +22,31 @@ export const authIDHandler= async (
 
     try {
         const result = await getAuthID(appID, userID);
-
+        const level = getLogLevel(reply.statusCode);
+        
         await sendAuthIDEvent({
             appID,
             userID,
             authID: result.authID
         });
 
-        const diff = process.hrtime(startTime);
-        const responseTimeMs = diff[0] * 1000 + diff[1] / 1e6; // ms로 변환
-
-        await kafkaEventLogProducer({
-            timestamp: new Date().toISOString(),
-            header: {
-                authorization: req.headers['authorization'] || '',
-                xForwardedFor: req.headers['x-forwarded-for'] || req.ip ||'',
-                userAgent: req.headers['user-agent'] || '',
-                contentType: req.headers['content-type'] || ''
-            },
-            data: {
-                appID,
-                userID,
-                authID: result.authID
-            },
-            path: req.routeOptions.url ?? req.url,
-            method: req.method,
-            statusCode: reply.statusCode,
-            responseTime: responseTimeMs
-        });
+        await eventLogger(req, reply, level, { 
+            appID,
+            userID,
+            authID: result.authID
+        }, startTime);
 
         return reply.status(200).send({
             authID: result.authID
         });
     }
     catch (error) {
-        console.error('Error retrieving AuthID:', error);
+        const level = getLogLevel(reply.statusCode);
+        
+        await eventLogger(req, reply, level, {
+            error: 'Error retrieving AuthID',
+        }, startTime);
+
         return reply.status(500).send({ message: 'Internal Server Error' });
     }
 }

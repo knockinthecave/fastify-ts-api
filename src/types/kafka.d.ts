@@ -10,6 +10,7 @@ export interface AuthIDEventData {
 }
 
 export interface EventLogData {
+    level: 'info' | 'error' | 'warn';
     timestamp: string;
     header: {
         authorization: string;
