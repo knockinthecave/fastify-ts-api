@@ -11,28 +11,28 @@ type RequestQuery = {
 export const authIDHandler= async (
     req: FastifyRequest<{ Querystring: RequestQuery }>, 
     reply: FastifyReply
-) => {
-    const { appID, userID } = req.query;
+): Promise<FastifyReply> => {
+    const query = req.query;
 
-    if (!appID || !userID) {
+    if (!query?.appID || !query?.userID) {
         return reply.status(400).send({ message: 'appID and userID are required.' });
     }
 
     const startTime = process.hrtime();
 
     try {
-        const result = await getAuthID(appID, userID);
+        const result = await getAuthID(query.appID, query.userID);
         const level = getLogLevel(reply.statusCode);
         
         await sendAuthIDEvent({
-            appID,
-            userID,
+            appID: query.appID,
+            userID: query.userID,
             authID: result.authID
         });
 
         await eventLogger(req, reply, level, { 
-            appID,
-            userID,
+            appID: query.appID,
+            userID: query.userID,
             authID: result.authID
         }, startTime);
 
@@ -40,11 +40,12 @@ export const authIDHandler= async (
             authID: result.authID
         });
     }
-    catch (error) {
+    catch (err: any) {
         const level = getLogLevel(reply.statusCode);
         
         await eventLogger(req, reply, level, {
-            error: 'Error retrieving AuthID',
+            error: err?.message || 'Error retrieving authID',
+            stack: err?.stack || ''
         }, startTime);
 
         return reply.status(500).send({ message: 'Internal Server Error' });
