@@ -18,7 +18,7 @@ export interface EventLogData {
         userAgent: string;
         contentType: string;
     },
-    data: Record<string, any> | Record<string, any>[];
+    data: Record<string, any> | Record<string, any>[]; 
     path: string;
     method: string;
     statusCode: number;
