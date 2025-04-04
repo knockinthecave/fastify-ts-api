@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { getAuthID } from './authID.service';
 import { sendAuthIDEvent } from '../../../../utils/kafkaProducer';
-import { eventLogger, getLogLevel } from '../../../../utils/logger';
+import { eventLogger } from '../../../../utils/logger';
 
 type RequestQuery = {
     appID: string;
@@ -18,11 +18,10 @@ export const authIDHandler= async (
         return reply.status(400).send({ message: 'appID and userID are required.' });
     }
 
-    const startTime = process.hrtime();
+    const startTime = Date.now();
 
     try {
         const result = await getAuthID(query.appID, query.userID);
-        const level = getLogLevel(reply.statusCode);
         
         await sendAuthIDEvent({
             appID: query.appID,
@@ -30,7 +29,7 @@ export const authIDHandler= async (
             authID: result.authID
         });
 
-        await eventLogger(req, reply, level, { 
+        await eventLogger(req, reply, { 
             appID: query.appID,
             userID: query.userID,
             authID: result.authID
@@ -41,9 +40,7 @@ export const authIDHandler= async (
         });
     }
     catch (err: any) {
-        const level = getLogLevel(reply.statusCode);
-        
-        await eventLogger(req, reply, level, {
+        await eventLogger(req, reply, {
             error: err?.message || 'Error retrieving authID',
             stack: err?.stack || ''
         }, startTime);

@@ -12,15 +12,14 @@ export const getLogLevel = (statusCode: number): LogLevel => {
 export const eventLogger = async (
     req: FastifyRequest,
     reply: FastifyReply,
-    level: LogLevel,
     data: Record<string, any> | Record<string, any>[],
-    startTime: [number, number]
+    startTime: number,
 ): Promise<void> => {
-    const diff = process.hrtime(startTime);
-    const responseTimeMs = diff[0] * 1000 + diff[1] / 1e6; // ms로 변환
+    const responseTime = Date.now() - startTime;
+    const level = getLogLevel(reply.statusCode);
 
     await kafkaEventLogProducer({
-        level,
+        level: level,
         timestamp: new Date().toISOString(),
         header: {
             authorization: req.headers['authorization'] || '',
@@ -32,6 +31,6 @@ export const eventLogger = async (
         path: req.routeOptions?.url ?? req.url,
         method: req.method,
         statusCode: reply.statusCode,
-        responseTime: responseTimeMs
+        responseTime: responseTime
     });
 }
