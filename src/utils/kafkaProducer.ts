@@ -3,7 +3,7 @@ import { AuthIDEventData, EventLogData } from '../types/kafka';
 
 const kafka = new Kafka({
     clientId: 'fastify-api',
-    brokers: ['kafka:9092'],
+    brokers: ['3.35.147.189:9092'],
 })
 
 export const kafkaProducer: Producer = kafka.producer();
